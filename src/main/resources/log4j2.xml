@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration name="JavaCourse" status="WARN">
+    <Appenders>
+        <Console name="STDOUT" target="SYSTEM_OUT">
+            <PatternLayout pattern="[%level] %d{HH:mm:ss.SSS} [%t] %logger{36} - %msg%n"/>
+        </Console>
+        <File name="File" fileName="logs/logs.log" append="false">
+            <PatternLayout pattern="[%level] %d{HH:mm:ss.SSS} [%t] %logger{36} - %msg%n"/>
+        </File>
+    </Appenders>
+    <Loggers>
+        <Root level="info">
+            <AppenderRef ref="STDOUT"/>
+            <AppenderRef ref="File"/>
+        </Root>
+    </Loggers>
+</Configuration>
