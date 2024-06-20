@@ -1,13 +1,17 @@
 package com.solvd.webtest.pages;
 
+import com.google.common.collect.Iterables;
 import com.solvd.webtest.components.SearchResult;
+import com.solvd.webtest.util.Config;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class SearchResultPage extends BasePage {
     private List<SearchResult.Result> results = new ArrayList<>();
@@ -20,7 +24,7 @@ public class SearchResultPage extends BasePage {
     private List<WebElement> sortOptions;
 
     public SearchResultPage(WebDriver driver) {
-        super(driver, "https://www.ebay.com/sch");
+        super(driver, Config.get("searchResultPage.url"));
         PageFactory.initElements(driver, this);
 
         searchResult = new SearchResult(driver);
@@ -56,5 +60,21 @@ public class SearchResultPage extends BasePage {
                         results.add(new SearchResult.Result(r));
                     break;
                 }
+    }
+
+    public List<SearchResult.Result> getNoSponsoredResults() {
+        Map<String, List<SearchResult.Result>> resultsGrouped = new HashMap<>();
+
+        for (var r : results) {
+            resultsGrouped.computeIfAbsent(r.getSponsored(), k -> new ArrayList<>());
+            resultsGrouped.get(r.getSponsored()).add(r);
+        }
+
+        int index = 0;
+        for (int i = 1; i < resultsGrouped.values().size(); i++)
+            if (Iterables.get(resultsGrouped.values(), i).size() > Iterables.get(resultsGrouped.values(), index).size())
+                index = i;
+
+        return Iterables.get(resultsGrouped.values(), index);
     }
 }

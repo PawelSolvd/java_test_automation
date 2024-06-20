@@ -1,5 +1,6 @@
 package com.solvd.webtest.pages;
 
+import com.solvd.webtest.util.Config;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
@@ -21,7 +22,7 @@ public class HomePage extends BasePage {
     private WebElement searchButton;
 
     public HomePage(WebDriver driver) {
-        super(driver, "https://www.ebay.com/");
+        super(driver, Config.get("homePage.url"));
         PageFactory.initElements(driver, this);
     }
 

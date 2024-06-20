@@ -30,13 +30,16 @@ public class SearchResult {
         // @FindBy(className = "s-item__shipping")
         private WebElement shipping;
 
+        @FindBy(css = ".s-item__sep > span")
+        private WebElement sponsored;
+
         public Result(WebElement element) {
             PageFactory.initElements(element, this);
 
             if (element.findElements(By.cssSelector(".s-item__shipping")).isEmpty())
                 shipping = null;
             else
-                shipping = element.findElement(By.cssSelector(" .s-item__shipping"));
+                shipping = element.findElement(By.cssSelector(".s-item__shipping"));
         }
 
         public Result(Result other) {
@@ -44,6 +47,7 @@ public class SearchResult {
             this.price = other.price;
             this.location = other.location;
             this.shipping = other.shipping;
+            this.sponsored = other.sponsored;
         }
 
         public String getTitle() {
@@ -63,6 +67,9 @@ public class SearchResult {
         }
 
         public String getLocation() {
+            if (location == null)
+                return "";
+
             String loc = location.getText();
 
             if (!loc.isEmpty())
@@ -84,9 +91,16 @@ public class SearchResult {
             return "0";
         }
 
+        public String getSponsored() {
+            if (sponsored != null)
+                return sponsored.getDomAttribute("style");
+
+            return "";
+        }
+
         @Override
         public String toString() {
-            return getTitle() + " " + getPrice() + " " + getLocation() + " " + getShipping();
+            return getTitle() + " " + getPrice() + " " + getLocation() + " " + getShipping() + " " + getSponsored();
         }
     }
 

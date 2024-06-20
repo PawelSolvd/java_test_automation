@@ -1,10 +1,11 @@
 package com.solvd.webtest.pages;
 
+import com.solvd.webtest.util.Config;
 import org.openqa.selenium.WebDriver;
 
 public class CategoriesPage extends BasePage {
     public CategoriesPage(WebDriver driver) {
-        super(driver, "https://www.ebay.com/n/all-categories");
+        super(driver, Config.get("categoriesPage.url"));
     }
 
     @Override

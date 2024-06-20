@@ -5,6 +5,7 @@ import com.solvd.webtest.pages.CategoriesPage;
 import com.solvd.webtest.pages.HomePage;
 import com.solvd.webtest.pages.LoginPage;
 import com.solvd.webtest.pages.SearchResultPage;
+import com.solvd.webtest.util.Config;
 import org.openqa.selenium.OutputType;
 import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.chrome.ChromeDriver;
@@ -38,6 +39,8 @@ public class HomePageTest extends AbstractTest {
         driver.get().manage().window().maximize();
 
         LOGGER.info("Setting {} driver", getBrowserDetails());
+
+        Config.loadFile("lol");
     }
 
     @AfterMethod
@@ -80,7 +83,7 @@ public class HomePageTest extends AbstractTest {
         driver.get().manage().timeouts().implicitlyWait(Duration.ofSeconds(2));
         Assert.assertTrue(loginPage.isOpen());
 
-        Assert.assertTrue(loginPage.tryLogin("adam"));
+        Assert.assertTrue(loginPage.tryLogin(Config.get("user.login")));
     }
 
     @Test(threadPoolSize = 4, invocationCount = 1)
@@ -89,7 +92,7 @@ public class HomePageTest extends AbstractTest {
         homePage.open();
         Assert.assertTrue(homePage.isOpen());
 
-        SearchResultPage searchResultPage = homePage.search("iphone", "Art");
+        SearchResultPage searchResultPage = homePage.search(Config.get("search.query"), Config.get("search.category"));
         Assert.assertTrue(searchResultPage.isOpen());
 
         Assert.assertFalse(searchResultPage.getResults().isEmpty());
@@ -112,20 +115,25 @@ public class HomePageTest extends AbstractTest {
         homePage.open();
         Assert.assertTrue(homePage.isOpen());
 
-        SearchResultPage searchResultPage = homePage.search("iphone", "Art");
+        SearchResultPage searchResultPage = homePage.search(Config.get("search.query"), Config.get("search.category"));
         Assert.assertTrue(searchResultPage.isOpen());
 
         List<SearchResult.Result> results = searchResultPage.getResults();
 
         Assert.assertFalse(results.isEmpty());
 
-        searchResultPage.setSortOption("Price + Shipping: highest first");
+        searchResultPage.setSortOption(Config.get("search.sorting"));
+
+        results = searchResultPage.getNoSponsoredResults();
 
         driver.get().manage().timeouts().implicitlyWait(Duration.ofSeconds(4));
 
-        //searchResultPage.printResults();
+        searchResultPage.printResults();
 
         List<Double> prices = results.stream().map(r -> Double.parseDouble(r.getPrice()) + Double.parseDouble(r.getShipping())).toList();
+
+        LOGGER.info("Non sponsored prices count = {}", prices.size());
+        prices.forEach(p -> LOGGER.info(p.toString()));
 
         Assert.assertEquals(prices.stream().sorted(Comparator.reverseOrder()).toList(), prices);
     }

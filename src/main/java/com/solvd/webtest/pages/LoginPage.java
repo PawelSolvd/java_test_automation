@@ -1,5 +1,6 @@
 package com.solvd.webtest.pages;
 
+import com.solvd.webtest.util.Config;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
@@ -14,7 +15,7 @@ public class LoginPage extends BasePage {
     private WebElement continueButton;
 
     public LoginPage(WebDriver driver) {
-        super(driver, "https://signin.ebay.com/");
+        super(driver, Config.get("loginPage.url"));
         PageFactory.initElements(driver, this);
     }
 
