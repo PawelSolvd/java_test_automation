@@ -8,13 +8,9 @@ import com.solvd.webtest.pages.SearchResultPage;
 import com.solvd.webtest.util.Config;
 import org.openqa.selenium.OutputType;
 import org.openqa.selenium.TakesScreenshot;
-import org.openqa.selenium.chrome.ChromeDriver;
-import org.openqa.selenium.firefox.FirefoxDriver;
 import org.testng.Assert;
 import org.testng.ITestResult;
 import org.testng.annotations.AfterMethod;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
 import java.io.File;
@@ -22,27 +18,10 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Clock;
-import java.time.Duration;
 import java.util.Comparator;
 import java.util.List;
 
 public class HomePageTest extends AbstractTest {
-
-    @BeforeMethod
-    @Parameters("browser")
-    public void setup(String browser) {
-        if (browser.equals("chrome"))
-            driver.set(new ChromeDriver());
-        else if (browser.equals("firefox"))
-            driver.set(new FirefoxDriver());
-
-        driver.get().manage().window().maximize();
-
-        LOGGER.info("Setting {} driver", getBrowserDetails());
-
-        Config.loadFile("lol");
-    }
-
     @AfterMethod
     public void dispose(ITestResult result) {
         if (!result.isSuccess()) {
@@ -54,7 +33,7 @@ public class HomePageTest extends AbstractTest {
             }
         }
 
-        driver.get().manage().timeouts().implicitlyWait(Duration.ofSeconds(2));
+        //driver.get().manage().timeouts().implicitlyWait(Duration.ofSeconds(2));
         driver.get().close();
 
         LOGGER.info("Closing {} driver", getBrowserDetails());
@@ -67,7 +46,7 @@ public class HomePageTest extends AbstractTest {
         Assert.assertTrue(homePage.isOpen());
 
         LoginPage loginPage = homePage.clickMyEbay();
-        driver.get().manage().timeouts().implicitlyWait(Duration.ofSeconds(2));
+        //driver.get().manage().timeouts().implicitlyWait(Duration.ofSeconds(2));
         Assert.assertTrue(loginPage.isOpen());
 
         Assert.assertFalse(loginPage.tryLogin(""));
@@ -80,7 +59,7 @@ public class HomePageTest extends AbstractTest {
         Assert.assertTrue(homePage.isOpen());
 
         LoginPage loginPage = homePage.clickMyEbay();
-        driver.get().manage().timeouts().implicitlyWait(Duration.ofSeconds(2));
+        //driver.get().manage().timeouts().implicitlyWait(Duration.ofSeconds(2));
         Assert.assertTrue(loginPage.isOpen());
 
         Assert.assertTrue(loginPage.tryLogin(Config.get("user.login")));
@@ -126,7 +105,7 @@ public class HomePageTest extends AbstractTest {
 
         results = searchResultPage.getNoSponsoredResults();
 
-        driver.get().manage().timeouts().implicitlyWait(Duration.ofSeconds(4));
+        //driver.get().manage().timeouts().implicitlyWait(Duration.ofSeconds(4));
 
         searchResultPage.printResults();
 

@@ -6,6 +6,9 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
+import org.openqa.selenium.support.ui.WebDriverWait;
+
+import java.time.Duration;
 
 public class LoginPage extends BasePage {
     @FindBy(id = "userid")
@@ -26,6 +29,8 @@ public class LoginPage extends BasePage {
     }
 
     public boolean tryLogin(String username) {
+        new WebDriverWait(driver, Duration.ofSeconds(5)).until(d -> usernameField.isDisplayed());
+
         usernameField.sendKeys(username);
         continueButton.click();
 

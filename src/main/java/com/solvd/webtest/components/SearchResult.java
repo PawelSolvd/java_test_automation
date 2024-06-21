@@ -5,7 +5,9 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
+import org.openqa.selenium.support.ui.WebDriverWait;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -53,22 +55,28 @@ public class SearchResult {
         public String getTitle() {
             if (title == null)
                 return "";
+            new WebDriverWait(driver, Duration.ofMillis(500)).until(d -> title.isDisplayed());
             return title.getText();
         }
 
         public String getPrice() {
             if (price == null)
                 return "0";
+
+            new WebDriverWait(driver, Duration.ofMillis(500)).until(d -> price.isDisplayed());
+
             String pr = price.getText().substring(1).replace(",", "");
             if (pr.isEmpty())
                 return pr;
 
-            return pr.substring(Math.max(pr.indexOf('$') + 1, 0), ((pr.indexOf('$') < 0)) ? pr.length() : pr.length());
+            return pr.substring(Math.max(pr.indexOf('$') + 1, 0));
         }
 
         public String getLocation() {
             if (location == null)
                 return "";
+
+            new WebDriverWait(driver, Duration.ofMillis(500)).until(d -> location.isDisplayed());
 
             String loc = location.getText();
 
@@ -82,6 +90,8 @@ public class SearchResult {
             if (shipping == null)
                 return "0";
 
+            new WebDriverWait(driver, Duration.ofMillis(500)).until(d -> shipping.isDisplayed());
+
             String shp = shipping.getText().replace(",", "");
 
             if (!shp.isEmpty())
@@ -92,8 +102,10 @@ public class SearchResult {
         }
 
         public String getSponsored() {
-            if (sponsored != null)
+            if (sponsored != null) {
+                new WebDriverWait(driver, Duration.ofMillis(500)).until(d -> sponsored.isDisplayed());
                 return sponsored.getDomAttribute("style");
+            }
 
             return "";
         }

@@ -7,6 +7,9 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
 import org.openqa.selenium.support.ui.Select;
+import org.openqa.selenium.support.ui.WebDriverWait;
+
+import java.time.Duration;
 
 public class HomePage extends BasePage {
     @FindBy(id = "gh-eb-My")
@@ -33,12 +36,15 @@ public class HomePage extends BasePage {
     }
 
     public LoginPage clickMyEbay() {
+        new WebDriverWait(driver, Duration.ofMillis(500)).until(d -> myEbayButton.isDisplayed());
         myEbayButton.click();
         return new LoginPage(driver);
     }
 
     public SearchResultPage search(String query, String category) {
         searchField.sendKeys(query);
+
+        new WebDriverWait(driver, Duration.ofMillis(500)).until(d -> searchCategorySelect.getWrappedElement().isDisplayed());
 
         if (searchCategorySelect.getOptions().stream().map(WebElement::getText).toList().contains(category))
             searchCategorySelect.selectByVisibleText(category);
