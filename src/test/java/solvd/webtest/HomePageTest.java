@@ -6,114 +6,104 @@ import com.solvd.webtest.pages.HomePage;
 import com.solvd.webtest.pages.LoginPage;
 import com.solvd.webtest.pages.SearchResultPage;
 import com.solvd.webtest.util.Config;
-import org.openqa.selenium.OutputType;
-import org.openqa.selenium.TakesScreenshot;
-import org.testng.Assert;
-import org.testng.ITestResult;
-import org.testng.annotations.AfterMethod;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.time.Clock;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
+import static org.testng.Assert.*;
+
 public class HomePageTest extends AbstractTest {
-    @AfterMethod
-    public void dispose(ITestResult result) {
-        if (!result.isSuccess()) {
-            File file = ((TakesScreenshot) driver.get()).getScreenshotAs(OutputType.FILE);
-            try {
-                Files.copy(file.toPath(), Path.of("screenshots/img" + Clock.systemUTC().millis() + ".png"));
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-        }
-
-        //driver.get().manage().timeouts().implicitlyWait(Duration.ofSeconds(2));
-        driver.get().close();
-
-        LOGGER.info("Closing {} driver", getBrowserDetails());
-    }
-
     @Test
     public void emptyLoginTest() {
         HomePage homePage = new HomePage(driver.get());
         homePage.open();
-        Assert.assertTrue(homePage.isOpen());
+        assertTrue(homePage.isOpen(), "HomePage is not opened");
 
         LoginPage loginPage = homePage.clickMyEbay();
-        //driver.get().manage().timeouts().implicitlyWait(Duration.ofSeconds(2));
-        Assert.assertTrue(loginPage.isOpen());
+        assertTrue(loginPage.isOpen(), "LoginPage is not opened");
 
-        Assert.assertFalse(loginPage.tryLogin(""));
+        assertFalse(loginPage.tryLogin(""), "Missing login error message");
     }
 
     @Test
     public void validLoginTest() {
         HomePage homePage = new HomePage(driver.get());
         homePage.open();
-        Assert.assertTrue(homePage.isOpen());
+        assertTrue(homePage.isOpen(), "HomePage is not opened");
 
         LoginPage loginPage = homePage.clickMyEbay();
-        //driver.get().manage().timeouts().implicitlyWait(Duration.ofSeconds(2));
-        Assert.assertTrue(loginPage.isOpen());
+        assertTrue(loginPage.isOpen(), "LoginPage is not opened");
 
-        Assert.assertTrue(loginPage.tryLogin(Config.get("user.login")));
+        assertTrue(loginPage.tryLogin(Config.get("user.login")), "Login error");
     }
 
-    @Test(threadPoolSize = 4, invocationCount = 1)
-    public void validSearchWithCategoryTest() {
+    @DataProvider(name = "searchData")
+    public Object[][] searchDataProvider() {
+        return new Object[][]{
+                {"iphone", "Art"},
+                {"ipad", "Books"}
+        };
+    }
+
+    @Test(dataProvider = "searchData", threadPoolSize = 4, invocationCount = 1)
+    public void validSearchWithCategoryTest(String query, String category) {
         HomePage homePage = new HomePage(driver.get());
         homePage.open();
-        Assert.assertTrue(homePage.isOpen());
+        assertTrue(homePage.isOpen(), "HomePage is not opened");
 
-        SearchResultPage searchResultPage = homePage.search(Config.get("search.query"), Config.get("search.category"));
-        Assert.assertTrue(searchResultPage.isOpen());
+        SearchResultPage searchResultPage = homePage.search(query, category);
+        assertTrue(searchResultPage.isOpen(), "SearchResultPage is not opened");
 
-        Assert.assertFalse(searchResultPage.getResults().isEmpty());
+        List<SearchResult.Result> results = searchResultPage.getResults();
+
+        assertFalse(results.isEmpty(), "No search results");
         searchResultPage.printResults();
+
+        List<SearchResult.Result> notMatching = new ArrayList<>();
+        assertTrue(
+                results.stream()
+                        .allMatch(r -> {
+                            if (!r.getTitle().toLowerCase().contains(query.toLowerCase())) {
+                                notMatching.add(r);
+                                return false;
+                            } else return true;
+                        }) || ((double) notMatching.size() / results.size() <= 0.1), "Product title not containing query" + notMatching);
     }
 
     @Test
     public void emptySearchTest() {
         HomePage homePage = new HomePage(driver.get());
         homePage.open();
-        Assert.assertTrue(homePage.isOpen());
+        assertTrue(homePage.isOpen(), "HomePage is not opened");
 
         homePage.search("", "");
-        Assert.assertTrue(new CategoriesPage(driver.get()).isOpen());
+        assertTrue(new CategoriesPage(driver.get()).isOpen(), "CategoriesPage is not opened");
     }
 
-    @Test
-    public void searchSortPriceDescTest() {
+    @Test(dataProvider = "searchData")
+    public void searchSortPriceDescTest(String query, String category) {
         HomePage homePage = new HomePage(driver.get());
         homePage.open();
-        Assert.assertTrue(homePage.isOpen());
+        assertTrue(homePage.isOpen(), "HomePage is not opened");
 
-        SearchResultPage searchResultPage = homePage.search(Config.get("search.query"), Config.get("search.category"));
-        Assert.assertTrue(searchResultPage.isOpen());
+        SearchResultPage searchResultPage = homePage.search(query, category);
+        assertTrue(searchResultPage.isOpen(), "SearchResultPage is not opened");
 
         List<SearchResult.Result> results = searchResultPage.getResults();
+        assertFalse(results.isEmpty(), "No search results");
 
-        Assert.assertFalse(results.isEmpty());
-
-        searchResultPage.setSortOption(Config.get("search.sorting"));
-
+        searchResultPage.setSortOption("Price + Shipping: highest first");
         results = searchResultPage.getNoSponsoredResults();
-
-        //driver.get().manage().timeouts().implicitlyWait(Duration.ofSeconds(4));
-
-        searchResultPage.printResults();
+        //searchResultPage.printResults();
 
         List<Double> prices = results.stream().map(r -> Double.parseDouble(r.getPrice()) + Double.parseDouble(r.getShipping())).toList();
 
         LOGGER.info("Non sponsored prices count = {}", prices.size());
         prices.forEach(p -> LOGGER.info(p.toString()));
 
-        Assert.assertEquals(prices.stream().sorted(Comparator.reverseOrder()).toList(), prices);
+        assertEquals(prices.stream().sorted(Comparator.reverseOrder()).toList(), prices, "Results sorted incorrectly");
     }
 }

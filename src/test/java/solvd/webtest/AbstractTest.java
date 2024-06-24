@@ -1,9 +1,7 @@
 package solvd.webtest;
 
 import com.solvd.webtest.util.Config;
-import org.openqa.selenium.Capabilities;
-import org.openqa.selenium.JavascriptExecutor;
-import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.*;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.firefox.FirefoxDriver;
@@ -11,10 +9,15 @@ import org.openqa.selenium.remote.RemoteWebDriver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.ITestResult;
-import org.testng.annotations.AfterTest;
+import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Parameters;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.time.Clock;
 import java.util.List;
 
 public abstract class AbstractTest {
@@ -57,8 +60,22 @@ public abstract class AbstractTest {
         Config.loadFile("lol");
     }
 
-    @AfterTest
-    public abstract void dispose(ITestResult result);
+    @AfterMethod
+    public void dispose(ITestResult result) {
+        if (!result.isSuccess()) {
+            File file = ((TakesScreenshot) driver.get()).getScreenshotAs(OutputType.FILE);
+            try {
+                Files.copy(file.toPath(), Path.of("screenshots/img" + Clock.systemUTC().millis() + ".png"));
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        //driver.get().manage().timeouts().implicitlyWait(Duration.ofSeconds(2));
+        driver.get().close();
+
+        LOGGER.info("Closing {} driver", getBrowserDetails());
+    }
 
     public String getBrowserDetails() {
         Capabilities cap = ((RemoteWebDriver) driver.get()).getCapabilities();
