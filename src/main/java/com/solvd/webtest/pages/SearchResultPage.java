@@ -1,43 +1,40 @@
 package com.solvd.webtest.pages;
 
-import com.solvd.webtest.components.SearchResult;
-import com.solvd.webtest.util.Config;
+import com.solvd.webtest.components.Result;
+import com.zebrunner.carina.utils.R;
+import com.zebrunner.carina.webdriver.decorator.ExtendedWebElement;
+import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
-import org.openqa.selenium.support.PageFactory;
 
 import java.util.*;
 
 public class SearchResultPage extends BasePage {
-    private List<SearchResult.Result> results = new ArrayList<>();
+    @FindBy(css = ".srp-results .s-item__wrapper")
+    private List<Result> results;
 
     @FindBy(xpath = "(//button[@class='fake-menu-button__button btn btn--small btn--secondary'])[4]")
-    private WebElement sortingMenuBtn;
+    private ExtendedWebElement sortingMenuBtn;
 
     @FindBy(xpath = "(//ul[@class='fake-menu__items'])[4]//span")
-    private List<WebElement> sortOptions;
+    private List<ExtendedWebElement> sortOptions;
 
     public SearchResultPage(WebDriver driver) {
-        super(driver, Config.get("searchResultPage.url"));
-        PageFactory.initElements(driver, this);
-        
-        for (var r : new SearchResult(driver).getResults())
-            results.add(new SearchResult.Result(r));
+        super(driver, R.CONFIG.get("searchResultPage.url"));
     }
 
     @Override
     public boolean isOpen() {
         super.isOpen();
-        return driver.getCurrentUrl().startsWith(url);
+        return getDriver().getCurrentUrl().startsWith(url);
     }
 
     public void printResults() {
         for (var r : results)
-            LOGGER.info(r.toString());
+            LOGGER.info(r.print());
     }
 
-    public List<SearchResult.Result> getResults() {
+    public List<Result> getResults() {
         return results;
     }
 
@@ -49,14 +46,14 @@ public class SearchResultPage extends BasePage {
                 if (o.getText().equals(option)) {
                     o.click();
                     results.clear();
-                    for (var r : new SearchResult(driver).getResults())
-                        results.add(new SearchResult.Result(r));
+                    for (var e : findExtendedWebElements(By.cssSelector(".srp-results .s-item__wrapper")))
+                        results.add(new Result(driver, e.getSearchContext()));
                     break;
                 }
     }
 
-    public List<SearchResult.Result> getNoSponsoredResults() {
-        Map<String, List<SearchResult.Result>> resultsGrouped = new HashMap<>();
+    public List<Result> getNoSponsoredResults() {
+        Map<String, List<Result>> resultsGrouped = new HashMap<>();
 
         for (var r : results) {
             resultsGrouped.computeIfAbsent(r.getSponsored(), k -> new ArrayList<>());

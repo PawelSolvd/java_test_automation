@@ -1,6 +1,5 @@
 package solvd.webtest;
 
-import com.solvd.webtest.util.Config;
 import org.openqa.selenium.*;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
@@ -56,8 +55,6 @@ public abstract class AbstractTest {
         driver.get().manage().window().maximize();
 
         LOGGER.info("Setting {} driver", getBrowserDetails());
-
-        Config.loadFile("lol");
     }
 
     @AfterMethod

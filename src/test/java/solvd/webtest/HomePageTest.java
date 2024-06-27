@@ -1,11 +1,11 @@
 package solvd.webtest;
 
-import com.solvd.webtest.components.SearchResult;
+import com.solvd.webtest.components.Result;
 import com.solvd.webtest.pages.CategoriesPage;
 import com.solvd.webtest.pages.HomePage;
 import com.solvd.webtest.pages.LoginPage;
 import com.solvd.webtest.pages.SearchResultPage;
-import com.solvd.webtest.util.Config;
+import com.zebrunner.carina.utils.R;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
@@ -37,7 +37,7 @@ public class HomePageTest extends AbstractTest {
         LoginPage loginPage = homePage.clickMyEbay();
         assertTrue(loginPage.isOpen(), "LoginPage is not opened");
 
-        assertTrue(loginPage.tryLogin(Config.get("user.login")), "Login error");
+        assertTrue(loginPage.tryLogin(R.CONFIG.get("user.login")), "Login error");
     }
 
     @DataProvider(name = "searchData")
@@ -57,12 +57,12 @@ public class HomePageTest extends AbstractTest {
         SearchResultPage searchResultPage = homePage.search(query, category);
         assertTrue(searchResultPage.isOpen(), "SearchResultPage is not opened");
 
-        List<SearchResult.Result> results = searchResultPage.getResults();
+        List<Result> results = searchResultPage.getResults();
 
         assertFalse(results.isEmpty(), "No search results");
         searchResultPage.printResults();
 
-        List<SearchResult.Result> notMatching = new ArrayList<>();
+        List<Result> notMatching = new ArrayList<>();
         assertTrue(
                 results.stream()
                         .allMatch(r -> {
@@ -92,7 +92,7 @@ public class HomePageTest extends AbstractTest {
         SearchResultPage searchResultPage = homePage.search(query, category);
         assertTrue(searchResultPage.isOpen(), "SearchResultPage is not opened");
 
-        List<SearchResult.Result> results = searchResultPage.getResults();
+        List<Result> results = searchResultPage.getResults();
         assertFalse(results.isEmpty(), "No search results");
 
         searchResultPage.setSortOption("Price + Shipping: highest first");

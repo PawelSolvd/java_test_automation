@@ -1,5 +1,6 @@
 package com.solvd.webtest.pages;
 
+import com.zebrunner.carina.webdriver.gui.AbstractPage;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
@@ -9,33 +10,28 @@ import org.slf4j.LoggerFactory;
 
 import java.time.Duration;
 
-public abstract class BasePage {
-    protected WebDriver driver;
+public abstract class BasePage extends AbstractPage {
     protected String url;
 
     protected static Logger LOGGER;
 
-
     public BasePage(WebDriver driver, String url) {
-        this.driver = driver;
+        super(driver);
         this.url = url;
+        setPageAbsoluteURL(url);
         LOGGER = LoggerFactory.getLogger(getClass());
-    }
-
-    public void open() {
-        driver.get(url);
     }
 
     public boolean isOpen() {
         LOGGER.info("Url = {}", url);
-        LOGGER.info("DriverUrl = {}", driver.getCurrentUrl());
+        LOGGER.info("DriverUrl = {}", getDriver().getCurrentUrl());
 
-        WebElement body = driver.findElement(By.tagName("body"));
-        new WebDriverWait(driver, Duration.ofMillis(500))
+        WebElement body = getDriver().findElement(By.tagName("body"));
+        new WebDriverWait(getDriver(), Duration.ofMillis(500))
                 .pollingEvery(Duration.ofMillis(50))
-                .withMessage("Page " + driver.getCurrentUrl() + " not loaded properly")
+                .withMessage("Page " + getDriver().getCurrentUrl() + " not loaded properly")
                 .until(d -> body.isDisplayed());
 
-        return driver.getCurrentUrl().equals(url);
+        return getDriver().getCurrentUrl().equals(url);
     }
 }
