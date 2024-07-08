@@ -1,45 +1,47 @@
 package com.solvd.webtest.pages;
 
-import com.solvd.webtest.util.Config;
-import org.openqa.selenium.By;
+import com.zebrunner.carina.utils.R;
+import com.zebrunner.carina.webdriver.decorator.ExtendedWebElement;
 import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
-import org.openqa.selenium.support.PageFactory;
-import org.openqa.selenium.support.ui.WebDriverWait;
 
 import java.time.Duration;
 
 public class LoginPage extends BasePage {
     @FindBy(id = "userid")
-    private WebElement usernameField;
+    private ExtendedWebElement usernameField;
 
     @FindBy(id = "signin-continue-btn")
-    private WebElement continueButton;
+    private ExtendedWebElement continueButton;
+
+    @FindBy(id = "signin-error-msg")
+    private ExtendedWebElement signinError;
+
+    @FindBy(id = "user-info")
+    private ExtendedWebElement userInfo;
 
     public LoginPage(WebDriver driver) {
-        super(driver, Config.get("loginPage.url"));
-        PageFactory.initElements(driver, this);
+        super(driver, R.CONFIG.get("loginPage.url"));
+        setUiLoadedMarker(usernameField);
     }
 
     @Override
     public boolean isOpen() {
         super.isOpen();
-        return driver.getCurrentUrl().startsWith(url);
+        return getDriver().getCurrentUrl().startsWith(url);
     }
 
     public boolean tryLogin(String username) {
-        new WebDriverWait(driver, Duration.ofSeconds(5)).until(d -> usernameField.isDisplayed());
-
-        usernameField.sendKeys(username);
+        if (usernameField.isElementPresent(Duration.ofMillis(100)))
+            usernameField.type(username);
         continueButton.click();
 
-        if (!driver.findElements(By.id("signin-error-msg")).isEmpty())
+        if (signinError.isElementPresent(Duration.ofMillis(1000)))
             return false;
-        else if (!driver.findElements(By.id("user-info")).isEmpty() && driver.findElement(By.id("user-info")).getText().equals(username))
+        else if (userInfo.isElementPresent(Duration.ofMillis(1000)) && userInfo.getText().equals(username))
             return true;
 
-        LOGGER.warn("Sign in problems");
+        LOGGER.warn("Unexpected sign in problems");
         return false;
     }
 }
